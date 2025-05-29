@@ -2,8 +2,11 @@ name: Build Executables
 on: 
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+
+permissions:
+  contents: write
+  actions: read
+  packages: write
 
 jobs:
   build:
@@ -51,3 +54,21 @@ jobs:
         name: executable-${{ matrix.os }}
         path: dist/
         retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        files: |
+          executable-*/SpeechRecognizer-*
+        draft: false
+        prerelease: false
