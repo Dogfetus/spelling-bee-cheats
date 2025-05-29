@@ -1,0 +1,5 @@
+sounddevice>=0.5.2
+numpy>=1.26.4
+SpeechRecognition>=3.14.3
+pyaudio>=0.2.14
+pyinstaller>=5.0.0
