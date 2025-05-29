@@ -1,0 +1,30 @@
+name: Build Executables
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    
+    - name: Install dependencies
+      run: |
+        pip install sounddevice numpy SpeechRecognition pyaudio pyinstaller
+    
+    - name: Build executable
+      run: |
+        pyinstaller --onefile --windowed main.py
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: executable-${{ matrix.os }}
+        path: dist/
