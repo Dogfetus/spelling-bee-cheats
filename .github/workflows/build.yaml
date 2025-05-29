@@ -1,5 +1,9 @@
 name: Build Executables
-on: [push]
+on: 
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build:
@@ -9,22 +13,41 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: '3.11'
     
-    - name: Install dependencies
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
+        sudo apt update
+        sudo apt install -y portaudio19-dev
+    
+    - name: Install system dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install portaudio
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
         pip install sounddevice numpy SpeechRecognition pyaudio pyinstaller
+    
+    - name: Create directories
+      run: |
+        python -c "import os; [os.makedirs(d, exist_ok=True) for d in ['audio', 'ai', 'window']]"
     
     - name: Build executable
       run: |
-        pyinstaller --onefile --windowed main.py
+        pyinstaller --onefile --windowed --name "SpeechRecognizer-${{ matrix.os }}" main.py
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: executable-${{ matrix.os }}
         path: dist/
+        retention-days: 30
