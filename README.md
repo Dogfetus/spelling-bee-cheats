@@ -1,2 +1,1 @@
-# spelling-bee-cheats
-virtual speaker reads sound and spells word
+using virtual audio cable to read given word and provide correct spelling 
